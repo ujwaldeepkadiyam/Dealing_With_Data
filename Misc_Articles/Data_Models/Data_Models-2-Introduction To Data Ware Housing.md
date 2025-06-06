@@ -20,6 +20,15 @@ A **Data Warehouse** is a system used to store and analyze large amounts of data
 
 * **Examples**: Sales trends, quarterly performance, market analysis.
 
+### 🔍 Why This Difference Matters?
+OLTP is optimized for speed and accuracy in transactional tasks.
+
+OLAP is optimized for insight and exploration of data trends and patterns.
+
+A data warehouse is typically part of the OLAP ecosystem.
+
+
+
 ### 📊 Visual Comparison
 
 ```mermaid
