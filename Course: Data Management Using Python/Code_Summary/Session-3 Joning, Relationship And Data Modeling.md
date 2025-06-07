@@ -1,193 +1,253 @@
-# 📘 Python Session-3 Cheat Sheet
+# 📘 Python Session-3 Summary (Up to Advanced Joining)
 
-## 🔗 Join Concepts
+## 🔹 Topic: Joining, Relationship, and Data Model
 
-### 🔼 Vertical Join (Appending Tables)
+---
 
+## 1. 🧱 Types of Joining
+
+### 🔼 Vertical Join – Appending Tables
+- Combine datasets **row-wise** (same structure)
+- Rules:
+  - Same number of columns
+  - Same data types
+  - Order of columns matters
+
+```python
+pd.concat([df1, df2], ignore_index=True)
+````
+
+---
+
+### 🔁 Horizontal Join – Merging Tables
+
+* Combine datasets **column-wise** using a key
 * Rules:
 
-  1. Both tables must have the same fields.
-  2. Data types must match.
-  3. Source table is the first one; target table is appended.
-
-### 🔁 Horizontal Join (Merging Tables)
-
-* Rules:
-
-  1. Identify left and right tables.
-  2. Identify common fields.
-  3. Check common and uncommon records between both.
+  * Must specify `on` (common key)
+  * Use `how` for type of join
 
 ---
 
-## 📂 File Import: Read Excel Sheets
+## 2. 📚 Practice with Vertical Join
+
+### ✅ Scenario-Based Appending
+
+* Scenario 1–5 cover:
+
+  * Exact match appending
+  * Column mismatch handling
+  * Column renaming for compatibility
+  * Adding missing columns
+
+### ⚖️ Union vs Union All
+
+* **Union** removes duplicates
+* **Union All** retains all records
+
+---
+
+## 3. 🔗 Horizontal Join – Merging Datasets
+
+### Types of Horizontal Joins in Python
+
+#### 🔍 `INNER JOIN`
+
+* Returns records with matching keys in both datasets
 
 ```python
-import pandas as pd
+pd.merge(df1, df2, how='inner', on='key')
+```
 
-file_path = '...\\VERTICAL_JOIN_DATA.xlsx'
+#### 🌐 `FULL OUTER JOIN`
 
-df1 = pd.read_excel(file_path, sheet_name='MED_APPOLO')
-df2 = pd.read_excel(file_path, sheet_name='MED_CIPLA')
-df3 = pd.read_excel(file_path, sheet_name='MED_GENO')
-df4 = pd.read_excel(file_path, sheet_name='MED_RELEGARE')
-df5 = pd.read_excel(file_path, sheet_name='MED_GSK')
+* Returns all records from both datasets, fills unmatched with NaN
+
+```python
+pd.merge(df1, df2, how='outer', on='key')
+```
+
+#### 🚫 `UNMATCHED JOIN`
+
+* Identify records present in one dataset but not the other
+
+#### ⬅️ `LEFT OUTER JOIN`
+
+* All records from the left dataset, matched from right
+
+```python
+pd.merge(df1, df2, how='left', on='key')
+```
+
+#### ❌ `LEFT NULL JOIN`
+
+* Only left records **without** a match in right
+
+```python
+pd.merge(df1, df2, how='left', on='key')[df2['key'].isnull()]
+```
+
+#### ➡️ `RIGHT OUTER JOIN`
+
+* All records from the right dataset, matched from left
+
+```python
+pd.merge(df1, df2, how='right', on='key')
+```
+
+#### 🚫 `RIGHT NULL JOIN`
+
+* Only right records **without** a match in left
+
+---
+
+## 4. 🧪 Merging Rules Summary
+
+* **inner** = matched rows only
+* **outer** = all rows from both sides
+* **left** = all from left, matched from right
+* **right** = all from right, matched from left
+
+---
+
+### 🧪 Merging Test Exercises
+
+* Practice merges on various conditions
+* Understand behavior of nulls and missing keys
+
+---
+
+# 📘 Python Session-3 Summary: Advanced Joining
+
+## 🔹 ADVANCED JOINING
+
+### 🔗 Multi-Column Join
+Join based on multiple keys using `on=['PRODUCT', 'CITY']`.
+
+#### 🧪 Example
+```python
+pd.merge(left=prod_units, right=prod_price, how='inner', on=['PRODUCT', 'CITY'])
+````
+
+### 💲 Add Sales Column
+
+```python
+df['SALES'] = df['UNITS'] * df['PRICE']
 ```
 
 ---
 
-## 🔼 Append (Vertical Join)
+## 🧮 Types of Joins with Multi-Keys
+
+### 🔍 Inner Join
+
+* Returns only matching records from both datasets.
+
+### 🌐 Full Outer Join
+
+* Returns all records from both datasets; unmatched columns filled with NaN.
+
+### 🚫 Unmatched Join
+
+* Extract rows with mismatched values in either side.
 
 ```python
-df_combined = pd.concat([df1, df2, df3, df4, df5], ignore_index=True)
+df[df['UNITS'].isnull() | df['PRICE'].isnull()]
+```
+
+### ⬅️ Left Join
+
+* Returns all rows from the left table and matched from right.
+
+### ❌ Left Null Join
+
+* Only left table rows without a matching right table record.
+
+```python
+df[df['PRICE'].isnull()]
+```
+
+### ➡️ Right Join
+
+* All rows from the right and matching from left.
+
+### 🚫 Right Null Join
+
+* Right table rows with no match in left table.
+
+```python
+df[df['UNITS'].isnull()]
 ```
 
 ---
 
-## 🔍 Explore Combined Data
+## 🏷️ Use of `suffixes` in Merges
 
-* `df_combined.head()`
-* `df_combined.tail()`
-* `df_combined.info()`
-* `df_combined.shape`
-* `df_combined.duplicated().sum()`
-
----
-
-## 🧹 Remove Duplicates
+When merging datasets with overlapping column names, use:
 
 ```python
-df_cleaned = df_combined.drop_duplicates()
+pd.merge(df1, df2, how='inner', on='ACC_NO', suffixes=('_Jan', '_Feb'))
 ```
 
 ---
 
-## 🔁 Horizontal Join (Merge)
+# 📘 Python Session-3 Summary: Data Models
+
+## 🔹 DATA MODEL DESIGN
+
+---
+
+## 🧊 Types of Data Models
+
+### ⭐ 1. STAR SCHEMA
+- A central **fact table** connects directly to all **dimension tables**.
+- Simple and flat structure, ideal for query performance.
+
+#### 🔄 Example: Merge Transaction Data with Master Tables
+```python
+transaction_master = pd.read_excel(file_path, sheet_name='TRANSACTION_TABLE')
+customer_master    = pd.read_excel(file_path, sheet_name='CUSTOMER_TABLE')
+product_master     = pd.read_excel(file_path, sheet_name='PRODUCT_TABLE')
+store_master       = pd.read_excel(file_path, sheet_name='STORE_TABLE')
+staff_master       = pd.read_excel(file_path, sheet_name='STAFF_MASTER')
+
+# Step-by-step merging
+dm1 = pd.merge(transaction_master, customer_master, how='left', on='CUST_ID')
+dm2 = pd.merge(dm1, product_master, how='left', on='PROD_ID')
+dm3 = pd.merge(dm2, store_master, how='left', on='STORE_ID')
+final_output = pd.merge(dm3, staff_master, how='left', on='STAFF_ID')
+````
+
+#### 📑 Reordering Columns
 
 ```python
-# Example format
-pd.merge(left_df, right_df, how='inner', on='common_column')
+new_order_vars = ['ORDER_ID', 'ORDER_DT', 'CUST_ID', 'CUST_NAME', 'DOB', 'MOBILE',
+                  'PROD_ID', 'PROD_NAME', 'CATEGORY', 'PRICE', 'INVENTORY', 'SUPPLIER_ID',
+                  'STORE_ID', 'STORE_NAME', 'LOCATION', 'STAFF_ID', 'STAFF_NAME',
+                  'DESIGNATION', 'YOE', 'QTY']
+
+final_output_new = final_output[new_order_vars]
 ```
-
-Types of Join:
-
-* `inner` – Only matching rows
-* `left` – All from left, matching from right
-* `right` – All from right, matching from left
-* `outer` – All rows from both
 
 ---
 
-## 🧠 Filtering Data
+### ❄️ 2. SNOWFLAKE SCHEMA
+
+* Dimension tables are further normalized into sub-dimensions.
+* More complex structure; better for detailed analysis but slower queries.
+
+#### ⛓️ Example: Including Supplier Table
 
 ```python
-df[df['column'] == 'value']
-df[df['column'] > 100]
+supplier_master = pd.read_excel(file_path, sheet_name='SUPPLIER_MASTER')
+
+# Additional join to link supplier details
+dm4 = pd.merge(final_output, supplier_master, how='left', on='SUPPLIER_ID')
 ```
 
-
 ---
 
+These examples help establish a **robust data model** in Python using pandas merging logic.
 
-## 🔹 Join Concepts
-
-* **Vertical Join** using `pd.concat([...])`
-
-  * Rules:
-
-    * All tables must have same columns and data types
-    * First table is source, others are targets
-* **Horizontal Join** using `pd.merge(...)`
-
-  * Rules:
-
-    * Identify left/right tables and join keys
-    * Understand which records are common/uncommon
-
----
-
-## 🔹 Data Loading
-
-* Load Excel:
-
-  ```python
-  pd.read_excel(file_path, sheet_name='SheetName')
-  ```
-* Load CSV with encoding:
-
-  ```python
-  pd.read_csv(file_path, sep=',', encoding='Latin1')
-  ```
-
----
-
-## 🔹 Data Integrity Management
-
-* Handle column mismatches:
-
-  ```python
-  df.rename(columns={'old': 'new'}, inplace=True)
-  ```
-* Handle different data types:
-
-  ```python
-  df['col'] = df['col'].astype(str)
-  ```
-* Unequal columns during concatenation → missing columns are filled with NaN automatically
-
----
-
-## 🔹 Data Modeling & Consolidation
-
-* Combine quarterly transactional files (e.g., Q1–Q4) into one:
-
-  ```python
-  pd.concat([q1, q2, q3, q4], ignore_index=True)
-  ```
-* Explore with:
-
-  ```python
-  df.info(), df.head(), df.shape
-  ```
-
----
-
-## 🔹 Data Models in Python
-
-### 🗂️ Master Tables
-
-* `TRANSACTION_TABLE`
-* `CUSTOMER_TABLE`
-* `PRODUCT_TABLE`
-* `STORE_TABLE`
-* `STAFF_MASTER`
-* `SUPPLIER_MASTER` *(when available)*
-
-### 🔗 Data Model Construction
-
-```python
-step1 = pd.merge(transaction_master, customer_master, on='CUST_ID', how='left')
-step2 = pd.merge(step1, product_master, on='PROD_ID', how='left')
-step3 = pd.merge(step2, store_master, on='STORE_ID', how='left')
-step4 = pd.merge(step3, staff_master, on='STAFF_ID', how='left')
-final_output = pd.merge(step4, supplier_master, on='SUPPLIER_ID', how='left')  # optional
-```
-
-### 📐 Reorder Columns
-
-```python
-final_output = final_output[new_order_vars]
-```
-
-Example structure:
-
-```python
-[
- 'ORDER_ID', 'ORDER_DT', 'CUST_ID', 'CUST_NAME', 'DOB', 'MOBILE',
- 'PROD_ID', 'PROD_NAME', 'CATEGORY', 'PRICE', 'INVENTORY',
- 'SUPPLIER_ID', 'SUPPLIER_NAME', 'SUPP_LOCATION', 'CONTACT',
- 'STORE_ID', 'STORE_NAME', 'LOCATION',
- 'STAFF_ID', 'STAFF_NAME', 'DESIGNATION', 'YOE', 'QTY'
-]
-```
-
+* Star Schema: Ideal for performance and reporting
+* Snowflake Schema: Preferred for normalized data and flexibility
